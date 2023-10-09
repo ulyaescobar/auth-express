@@ -4,13 +4,10 @@ const {
 } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
   class User extends Model {
-    /**
-     * Helper method for defining associations.
-     * This method is not a part of Sequelize lifecycle.
-     * The `models/index` file will call this method automatically.
-     */
+
     static associate(models) {
       // define association here
+      User.hasMany(models.Post, { foreignKey: 'user_id' });
     }
   }
   User.init({
@@ -18,29 +15,30 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: false,
       validate: {
-        notEmpty: true, // Menambahkan validasi bahwa firstName tidak boleh kosong
+        notEmpty: true, 
       },
     },
     lastName: {
       type: DataTypes.STRING,
       allowNull: false,
       validate: {
-        notEmpty: true, // Menambahkan validasi bahwa lastName tidak boleh kosong
+        notEmpty: true, 
       },
     },
     email: {
       type: DataTypes.STRING,
       allowNull: false,
       validate: {
-        isEmail: true, // Memastikan bahwa nilai yang dimasukkan adalah alamat email yang valid
-        notEmpty: true, // Menambahkan validasi bahwa email tidak boleh kosong
+        isEmail: true, 
+        notEmpty: true, 
       },
     },
     password: {
       type: DataTypes.STRING,
       allowNull: false,
       validate: {
-        notEmpty: true, // Menambahkan validasi bahwa password tidak boleh kosong
+        notEmpty: true,
+        // isInt: true,
       },
     },
   }, {

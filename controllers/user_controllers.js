@@ -5,12 +5,12 @@ const { JWT_SECRET, REFRESH_TOKEN_SECRET } = process.env;
 
 // token akses
 function generateAccessToken(user) {
-  return jwt.sign({ id: user.id }, JWT_SECRET, { expiresIn: '20s' }); 
+  return jwt.sign({ id: user.id }, JWT_SECRET, { expiresIn: '2d' }); 
 }
 
 // refresh token
 function generateRefreshToken(user) {
-  return jwt.sign({ id: user.id }, REFRESH_TOKEN_SECRET); 
+  return jwt.sign({ id: user.id }, REFRESH_TOKEN_SECRET, { expiresIn: '2d' }); 
 }
 
 const validRefreshTokens = [];
@@ -148,7 +148,7 @@ self.refreshToken = async (req, res) => {
       }
 
       // Jika refreshToken valid, kita dapat menghasilkan access token yang baru
-      const accessToken = jwt.sign({ id: user.id }, JWT_SECRET, { expiresIn: '20s' });
+      const accessToken = jwt.sign({ id: user.id }, JWT_SECRET, { expiresIn: '2d' });
       const newRefreshToken = jwt.sign({ id: user.id }, JWT_REFRESH_SECRET, { expiresIn: '7d' });
 
       // Simpan refreshToken yang baru ke daftar valid
@@ -185,7 +185,22 @@ self.register = async (req, res) => {
     return res.status(201).json({ status: 201, message: 'User registered successfully', data: newUser });
   } catch (error) {
     console.error(error);
-    return res.status(500).json({status: 500, message: 'Registration failed' });
+
+    // Tangani error validasi disini
+    if (error.name === 'SequelizeValidationError') {
+      const validationErrors = error.errors.map(err => ({
+        field: err.path,
+        message: err.message,
+      }));
+
+      return res.status(400).json({
+        status: 400,
+        message: 'Validation failed',
+        errors: validationErrors,
+      });
+    }
+
+    return res.status(500).json({ status: 500, message: 'Registration failed' });
   }
 };
 
